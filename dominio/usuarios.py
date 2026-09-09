@@ -23,6 +23,9 @@ class Usuario:
         self.pedidosAmizade = {}
         usuarios[self.nome] = self
 
+    def __str__(self):
+        print(f'{self.nome}\n')
+
     def criarTrilha(self, nome: str, inicio: str, fim: str, dif: int, alturaMin: int, alturaMax: int, tempoMedio: time):
          Trilha(nome, inicio, fim, dif, alturaMin, alturaMax, tempoMedio, self)
     
