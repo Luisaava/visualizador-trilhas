@@ -2,9 +2,6 @@ from __future__ import annotations
 from datetime import date, time
 from typing import Optional
 
-# Quando plugar o módulo de trilhas, mantenha esta importação:
-# from .trilhas import Registro, Trilha, trilhas
-
 
 class Usuario:
     nome: str
@@ -44,8 +41,8 @@ class Usuario:
         return True, f"Pedido de amizade enviado para {destinatario.nome}."
 
     def aceitarPedido(self, remetente: Usuario) -> tuple[bool, str]:
-        if remetente.nome not in self.pedidosAmizade:
-            return False, f"Não há pedido pendente de {remetente.nome}."
+        # if remetente.nome not in self.pedidosAmizade:
+        #     return False, f"Não há pedido pendente de {remetente.nome}."
 
         self.pedidosAmizade.remove(remetente.nome)
         self.amigos.append(remetente.nome)
@@ -56,11 +53,11 @@ class Usuario:
         if nome_remetente in self.pedidosAmizade:
             self.pedidosAmizade.remove(nome_remetente)
             return True, f"Pedido de {nome_remetente} recusado."
-        return False, "Pedido não encontrado."
+        # return False, "Pedido não encontrado."
 
-    def criarTrilha(self, nome: str, inicio: str, fim: str, dif: int, alturaMin: int, alturaMax: int, tempoMedio: time):
-        # Trilha(nome, inicio, fim, dif, alturaMin, alturaMax, tempoMedio, self)
-        pass
+    # def criarTrilha(self, nome: str, inicio: str, fim: str, dif: int, alturaMin: int, alturaMax: int, tempoMedio: time):
+    #     # Trilha(nome, inicio, fim, dif, alturaMin, alturaMax, tempoMedio, self)
+    #     pass
 
     def to_dict(self) -> dict:
         return {
@@ -83,7 +80,6 @@ class Usuario:
 
 
 class Moderador(Usuario):
-    # Dicionário estático para aprovação quando a vertical de trilhas for conectada
     trilhasAprovacao: dict = {}
 
     def __init__(self, nome: str = "moderador", senha: str = "123"):

@@ -4,7 +4,7 @@ from servicos_tecnicos.persistencia import PersistenciaJSON
 
 class SessaoCadastro:
     def __init__(self, persistencia: PersistenciaJSON):
-        self.persistencia = persistencia
+        self.persistencia = persistencia 
 
     def criar_usuario(self, nome: str, senha: str) -> tuple[bool, Usuario | None, str]:
         if not nome.strip() or not senha.strip():

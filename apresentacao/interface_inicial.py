@@ -33,7 +33,7 @@ class InterfaceInicial:
                 case "2":
                     self.tela_cadastro()
                 case "0":
-                    print("Encerrando o programa...")
+                    print("tchau tchau!!")
                     break
                 case _:
                     print("Opção inválida.\n")

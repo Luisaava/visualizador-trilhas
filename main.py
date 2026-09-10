@@ -5,14 +5,14 @@ from apresentacao.interface_inicial import InterfaceInicial
 
 
 def main():
-    # 1. Serviços Técnicos
+    # Serviços Técnicos
     persistencia = PersistenciaJSON()
 
-    # 2. Aplicação
+    #Aplicação
     sessao_cadastro = SessaoCadastro(persistencia)
     sessao_login = SessaoLogin(persistencia)
 
-    # 3. Apresentação (Ponto de entrada)
+    #Apresentação
     app = InterfaceInicial(sessao_cadastro, sessao_login, persistencia)
     app.executar()
 

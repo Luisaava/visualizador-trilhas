@@ -18,10 +18,6 @@ class InterfaceUsuario:
         2 - Exibir amigos\n
         3 - Enviar pedido de amizade\n
         4 - Exibir e aceitar pedidos de amizade\n
-        5 - Criar trilha\n
-        6 - Realizar trilha individual\n
-        7 - Realizar trilha em grupo\n
-        8 - Postar conclusão de trilha\n
         0 - Sair\n""")
         while True:
             op: str = input("Digite um número para escolher uma opção: ")
@@ -34,12 +30,6 @@ class InterfaceUsuario:
                     self.enviarPedido()
                 case "4":
                     self.gerenciarPedidos()
-                case '5':
-                    pass
-                case '6':
-                    pass
-                case '7':
-                    pass
                 case '0':
                     break
                 case _:
@@ -66,20 +56,16 @@ class InterfaceUsuario:
             print(f"Usuário '{nome_alvo}' não encontrado.\n")
             return
 
-        # 1. Executa a regra no domínio e recebe o feedback
         sucesso, msg = self.usuarioAtivo.adicionarAmigo(alvo)
         print(f"\n{msg}\n")
 
-        # 2. Persiste as alterações no arquivo JSON
         if sucesso:
             todos[alvo.nome] = alvo
             self.persistencia.salvar_todos(todos)
 
     def gerenciarPedidos(self):
-        # 1. Carrega os dados mais recentes direto do disco
         todos = self.persistencia.carregar_todos()
         
-        # Garante que o usuarioAtivo está sincronizado com o arquivo
         if self.usuarioAtivo.nome in todos:
             self.usuarioAtivo = todos[self.usuarioAtivo.nome]
 
@@ -110,11 +96,9 @@ class InterfaceUsuario:
         acao = input("Escolha: ").strip()
 
         if acao == "1":
-            # Executa regra bilateral no domínio
             sucesso, msg = self.usuarioAtivo.aceitarPedido(remetente_obj)
             print(f"\n{msg}\n")
             if sucesso:
-                # OBRIGATÓRIO: Atualizar AMBOS no dicionário antes de salvar
                 todos[self.usuarioAtivo.nome] = self.usuarioAtivo
                 todos[remetente_obj.nome] = remetente_obj
                 self.persistencia.salvar_todos(todos)
