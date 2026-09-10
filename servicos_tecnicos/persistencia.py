@@ -1,40 +1,23 @@
-import sqlite3
-from dominio.operacoes import Calculo
+import json
+import os
+from dominio.usuarios import Usuario
 
-class PersistenciaHistorico:
-    def __init__(self, db_path="calculadora.db"):
-        self.db_path = db_path
-        self._criar_tabela()
 
-    def _criar_tabela(self):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS historico (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    operando1 REAL,
-                    operador TEXT,
-                    operando2 REAL,
-                    resultado REAL,
-                    data_hora TEXT
-                )
-            """)
-            conn.commit()
+class PersistenciaJSON:
+    def __init__(self, arquivo: str = "usuarios.json"):
+        self.arquivo = arquivo
 
-    def salvar(self, calculo: Calculo):
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO historico (operando1, operador, operando2, resultado, data_hora)
-                VALUES (?, ?, ?, ?, ?)
-            """, (calculo.operando1, calculo.operador, calculo.operando2, calculo.resultado, calculo.data_hora))
-            conn.commit()
+    def carregar_todos(self) -> dict[str, Usuario]:
+        if not os.path.exists(self.arquivo):
+            return {}
+        try:
+            with open(self.arquivo, "r", encoding="utf-8") as f:
+                dados = json.load(f)
+                return {nome: Usuario.from_dict(info) for nome, info in dados.items()}
+        except (json.JSONDecodeError, FileNotFoundError):
+            return {}
 
-    def listar_todos(self) -> list[Calculo]:
-        with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "SELECT operando1, operador, operando2, resultado, data_hora FROM historico ORDER BY id DESC"
-            )
-            linhas = cursor.fetchall()
-            return [Calculo(op1, op, op2, res, dt) for op1, op, op2, res, dt in linhas]
+    def salvar_todos(self, usuarios: dict[str, Usuario]) -> None:
+        dados = {nome: user.to_dict() for nome, user in usuarios.items()}
+        with open(self.arquivo, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)

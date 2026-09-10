@@ -1,16 +1,25 @@
-from dominio.usuarios import Usuario, usuarios
-def realizarLogin (usuario: str, senha: str) -> tuple[bool, Usuario]:
-    usuarioBD = usuarios.get(usuario)
-    if usuarioBD and usuarioBD.senha == senha:
-        print(f'Usuário {usuarioBD.nome} autenticado.')
-        return True, usuarioBD
-    print("Erro: login e senha inconsistentes.")
-    return False, None
+from dominio.usuarios import Usuario
+from servicos_tecnicos.persistencia import PersistenciaJSON
 
-def criarUsuario (nome:str, senha:str) -> tuple[bool, Usuario]:
-    if not usuarios[nome]:
-        usuarios[nome] = Usuario(nome, senha)
-        print(f'Usuário {nome} criado.')
-        return True, usuarios[nome]
-    print(f'Erro: usuário com nome {nome} já existente.')
-    return False, None
+MOD_USUARIO = "moderador"
+MOD_SENHA = "123"
+
+
+class SessaoLogin:
+    def __init__(self, persistencia: PersistenciaJSON):
+        self.persistencia = persistencia
+
+    def autenticar(self, nome: str, senha: str) -> tuple[bool, str, Usuario | None]:
+        """
+        Retorna: (sucesso, tipo_sessao, objeto_usuario)
+        tipo_sessao pode ser: 'MODERADOR', 'USUARIO' ou ''
+        """
+        if nome == MOD_USUARIO and senha == MOD_SENHA:
+            return True, "MODERADOR", None
+
+        usuarios = self.persistencia.carregar_todos()
+        usuario = usuarios.get(nome)
+        if usuario and usuario.senha == senha:
+            return True, "USUARIO", usuario
+
+        return False, "", None

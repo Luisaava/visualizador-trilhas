@@ -1,0 +1,20 @@
+{
+    "luisa": {
+        "nome": "luisa",
+        "senha": "123",
+        "dataEntrada": "2026-09-09",
+        "amigos": [
+            "luis"
+        ],
+        "pedidosAmizade": []
+    },
+    "luis": {
+        "nome": "luis",
+        "senha": "123",
+        "dataEntrada": "2026-09-09",
+        "amigos": [
+            "luisa"
+        ],
+        "pedidosAmizade": []
+    }
+}
