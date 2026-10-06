@@ -23,7 +23,7 @@ class Usuario:
         self.dataEntrada = date.fromisoformat(dataEntrada) if dataEntrada else date.today()
         self.amigos = amigos if amigos is not None else []
         self.pedidosAmizade = pedidosAmizade if pedidosAmizade is not None else []
-        self.conquistas = []
+        #self.conquistas = []
         self.trilhasConcluidas = []
 
     def __str__(self) -> str:
