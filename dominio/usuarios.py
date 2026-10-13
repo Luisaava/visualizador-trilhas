@@ -1,15 +1,17 @@
 from __future__ import annotations
 from datetime import date, time
 from typing import Optional
+from trilhas import Registro, Trilha
 
 
 class Usuario:
-    nome: str
-    senha: str
-    dataEntrada: date
-    amigos: list[str]
-    pedidosAmizade: list[str]
-
+    _nome: str
+    _senha: str
+    _dataEntrada: date
+    _amigos: list[str] = []
+    _pedidosAmizade: list[str] = []
+    _trilhasConcluidas: list[Registro] = []
+    _trilhasCriadas: list[Trilha] = []
     def __init__(
         self,
         nome: str,
