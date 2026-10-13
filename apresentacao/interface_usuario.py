@@ -26,6 +26,7 @@ class InterfaceUsuario:
             4 - Exibir e aceitar pedidos de amizade\n
             5 - Visualizar e escolher trilhas\n
             6 - Cadastrar Trilha\n
+            7 - Finalizar Percurso em andamento\n
             0 - Sair\n""")
             op: str = input("Digite um número para escolher uma opção: ")
             match(op):
@@ -41,6 +42,8 @@ class InterfaceUsuario:
                     self.visualizarTrilhas()
                 case "6":
                     self.cadastrarTrilha()
+                case "7":
+                    self.finalizarPercurso()
                 case '0':
                     break
                 case _:
@@ -254,6 +257,7 @@ class InterfaceUsuario:
         trilha_escolhida = self.visualizacao.exibir_trilhas()
         
         if trilha_escolhida:
-            #por enquanto visualiza só
-            print(f"Iniciado {trilha_escolhida.nome}!!")
+            resp = input(f"\nDeseja iniciar o percurso na trilha '{trilha_escolhida.nome}' agora? (s/n): ").strip().lower()
+            if resp == 's':
+                self.iniciarPercurso(trilha_escolhida)
         
