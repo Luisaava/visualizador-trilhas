@@ -1,7 +1,7 @@
 #usar builder como padrão de projeto
 from typing import TYPE_CHECKING
 from datetime import date,time
-#from dominio.usuarios import Usuario, Moderador
+#from dominio.usuarios import Usuario, Moderador 
 from abc import ABC
 
 if TYPE_CHECKING: ##mesma coisa aqui
@@ -32,14 +32,18 @@ class Trilha:
         self.criador = usuario
     def setAprovada(moderador):
         _apvoradaPor = moderador
+
 class Registro(ABC):
-    _trilha: Trilha
-    _data: date
-    _duracao: time
-    _nota: float
+    def __init__(self, trilha: Trilha, data: date):
+        self.trilha = trilha
+        self.data = data
+        self.duracao = None
+        self.nota = None
 
 class RegistroIndividual(Registro):
-    _usuario: Usuario
+    def __init__(self, trilha: Trilha, data: date, usuario):
+        super().__init__(trilha, data)
+        self.usuario = usuario
 
 class RegistroGrupo(Registro):
     _grupo: list[Usuario]

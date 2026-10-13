@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import date, time
 from typing import Optional, TYPE_CHECKING
-#from dominio.trilhas import Registro, Trilha
+#from dominio.trilhas import Registro, Trilha 
 
 if TYPE_CHECKING: ##tava dando problema de import circular e isso resolveu
     from dominio.trilhas import Registro, Trilha

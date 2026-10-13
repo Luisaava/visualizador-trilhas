@@ -1,8 +1,11 @@
 from dominio.usuarios import Usuario
 from servicos_tecnicos.persistencia import PersistenciaJSON
-from datetime import time
+from datetime import time, date
 from aplicacao.sessao_cadastroTrilha import SessaoCadastroTrilha
 from aplicacao.sessao_visualizacaoTrilha import SessaoVisualizacaoTrilha ####
+from aplicacao.sessao_inicioPercurso import SessaoInicioPercurso # <--- NOVO
+from aplicacao.sessao_finalizarPercurso import SessaoFinalizarPercurso # <--- NOVO
+from dominio.trilhas import RegistroIndividual # <--- NOVO
 
 class InterfaceUsuario:
     usuarioAtivo: Usuario
@@ -14,11 +17,14 @@ class InterfaceUsuario:
         self.persistencia = persistencia
         self.visualizacao = None
         self.cadastro = None
+        self.percurso_atual = None 
+        self.sessaoInicio = SessaoInicioPercurso()
+        self.sessaoFinalizar = SessaoFinalizarPercurso()
         self.exibirInterface()
     
     def exibirInterface(self):
+        print(f'Bem vindo, {self.usuarioAtivo.nome}.\n')
         while True:
-            print(f'Bem vindo, {self.usuarioAtivo.nome}.\n')
             print("""Opções:\n
             1 - Exibir perfil\n
             2 - Exibir amigos\n
@@ -26,7 +32,7 @@ class InterfaceUsuario:
             4 - Exibir e aceitar pedidos de amizade\n
             5 - Visualizar e escolher trilhas\n
             6 - Cadastrar Trilha\n
-            7 - Finalizar Percurso em andamento\n
+            7 - Finalizar percurso em andamento\n
             0 - Sair\n""")
             op: str = input("Digite um número para escolher uma opção: ")
             match(op):
@@ -50,7 +56,20 @@ class InterfaceUsuario:
                     print("Opção inválida.\n")
 
     def exibirPerfil(self):
-        print(self.usuarioAtivo)
+        print("\n PERFIL DE {self.usuarioAtivo.nome} ===")
+        print(f"Membro desde: {self.usuarioAtivo.dataEntrada}")
+
+        concluidas = self.usuarioAtivo.trilhasConcluidas ##pega lista de trilhas do usuario especifico
+        if not concluidas:
+            print("\nNenhuma trilha registrada ainda.")
+        else:
+            print(f"\nRegistros de Trilhas Concluídas:")
+            for i, r in enumerate(concluidas, start=1): #enumera as trilhasConcluidas
+                print(f"  {i}. Trilha: {r.trilha.nome}")
+                print(f"     - Data: {r.data}")
+                print(f"     - Tempo levado: {r.duracao}")
+                print(f"     - Nota dada: {r.nota}")
+        print("="*40 + "\n")
 
     def exibirAmigos(self):
         if len(self.usuarioAtivo.amigos) == 0:
@@ -127,14 +146,14 @@ class InterfaceUsuario:
             print("Operação cancelada.\n")
     
     def cadastrarTrilha(self):
-        nome = inicio = fim = dif = comp = alturaMin = alturaMax = tempoMedio = usuario = None
+        nome = inicio = fim = dif = comp = alturaMin = alturaMax = tempoMedio = usuario = None ##alterei pra igual em vez de virgula pois n funcionava
         print("Para cadastrar sua trilha, preencha os campos conforme pedido, ou digite 'sair' para sair")
         while True:
             nome = input("Digite o nome da sua trilha: ").strip()
             if nome.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in nome:
+            if "\x00" in nome: ##alterei isso também (Antes era find) pq recusava qualquer string
                 print("O nome possui um caractere inválido, tente novamente.")
                 continue
             if nome == "":
@@ -146,7 +165,7 @@ class InterfaceUsuario:
             if inicio.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in inicio:
+            if "\x00" in inicio: ##
                 print("O local do início possui um caractere inválido, tente novamente.")
                 continue
             if inicio == "":
@@ -158,7 +177,7 @@ class InterfaceUsuario:
             if fim.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in fim:
+            if "\x00" in fim: ##
                 print("O local do fim possui um caractere inválido, tente novamente.")
                 continue
             if fim == "":
@@ -252,7 +271,7 @@ class InterfaceUsuario:
 
     def visualizarTrilhas(self):
         if not self.visualizacao:
-            self.visualizacao = SessaoVisualizacaoTrilha()
+            self.visualizacao = SessaoVisualizacaoTrilha() ##instancia 
             
         trilha_escolhida = self.visualizacao.exibir_trilhas()
         
@@ -260,4 +279,57 @@ class InterfaceUsuario:
             resp = input(f"\nDeseja iniciar o percurso na trilha '{trilha_escolhida.nome}' agora? (s/n): ").strip().lower()
             if resp == 's':
                 self.iniciarPercurso(trilha_escolhida)
+
+    def iniciarPercurso(self, trilha):
+        if self.percurso_atual:
+            print(f"\nVocê já tem um percurso em andamento na {self.percurso_atual.trilha.nome}!!!")
+            return
+            
+        # Cria a instância inicial do registro
+        registro = RegistroIndividual(trilha, date.today(), self.usuarioAtivo)
+        
+        # Passa para a sessão iniciar
+        sucesso, msg, reg_iniciado = self.sessaoInicio.iniciarPercurso(registro)
+        
+        if sucesso:
+            self.percurso_atual = reg_iniciado
+            print(f"\n🚶‍♂️ {msg} Boa trilha!")
+
+    def finalizarPercurso(self):
+        if not self.percurso_atual:
+            print("\nVocê não tem nenhum percurso em andamento no momento.")
+            return
+            
+        print(f"\n=== FINALIZANDO PERCURSO: {self.percurso_atual.trilha.nome} ===")
+        
+        while True:
+            tempo_str = input("Quanto tempo você levou? (Formato: 'horas minutos'): ").strip()
+            try:
+                h_str, m_str = tempo_str.split()
+                duracao = time(int(h_str), int(m_str), 0)
+                break
+            except ValueError:
+                print("Formato inválido. Digite horas e minutos separados por espaço (ex: 2 30).")
+
+        while True:
+            nota_str = input("Qual nota você dá para a trilha? (0.0 a 5.0): ").strip()
+            try:
+                nota = float(nota_str)
+                if 0.0 <= nota <= 5.0:
+                    break
+                else:
+                    print("A nota deve ser entre 0.0 e 5.0.")
+            except ValueError:
+                print("Valor inválido.")
+
+        sucesso, msg = self.sessaoFinalizar.finalizarPercurso(self.percurso_atual, duracao, nota)
+        
+        if sucesso:
+            print(f"\n✅ {msg}")
+            self.percurso_atual = None # Limpa o percurso atual
+            
+            # Opcional: Atualiza o persistencia JSON com o novo registro do usuário
+            # todos = self.persistencia.carregar_todos()
+            # todos[self.usuarioAtivo.nome] = self.usuarioAtivo
+            # self.persistencia.salvar_todos(todos)
         
