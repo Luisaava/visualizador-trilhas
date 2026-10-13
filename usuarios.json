@@ -1,0 +1,40 @@
+{
+    "luisa": {
+        "nome": "luisa",
+        "senha": "123",
+        "dataEntrada": "2026-09-09",
+        "amigos": [
+            "luis",
+            "lucas",
+            "mateus"
+        ],
+        "pedidosAmizade": []
+    },
+    "luis": {
+        "nome": "luis",
+        "senha": "123",
+        "dataEntrada": "2026-09-09",
+        "amigos": [
+            "luisa"
+        ],
+        "pedidosAmizade": []
+    },
+    "lucas": {
+        "nome": "lucas",
+        "senha": "123",
+        "dataEntrada": "2026-09-10",
+        "amigos": [
+            "luisa"
+        ],
+        "pedidosAmizade": []
+    },
+    "mateus": {
+        "nome": "mateus",
+        "senha": "123",
+        "dataEntrada": "2026-09-10",
+        "amigos": [
+            "luisa"
+        ],
+        "pedidosAmizade": []
+    }
+}
