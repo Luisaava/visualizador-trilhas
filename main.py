@@ -3,7 +3,7 @@ from aplicacao.sessao_cadastroUsuario import SessaoCadastro
 from aplicacao.sessao_login import SessaoLogin
 from apresentacao.interface_inicial import InterfaceInicial
 
-from dominio.usuarios import Usuario
+from dominio.usuarios import Usuario, Moderador
 from dominio.trilhas import Trilha, trilhas
 from datetime import time
 
@@ -34,8 +34,33 @@ def carregar_trilhas_teste():
         usuario=usuario_teste
     )
 
+    trilha_falsa_1 = Trilha(
+        nome="Trilha da Costa da Lagoa",
+        inicio="Canto dos Araçás",
+        fim="Centrinho da Costa",
+        dif=4,
+        comprimento=7.5,
+        alturaMin=0,
+        alturaMax=150,
+        tempoMedio=time(2, 30, 0),
+        usuario=usuario_teste
+    )
+
+    trilha_falsa_3 = Trilha(
+        nome="Teste moderador",
+        inicio="Praia Mole",
+        fim="Praia do Gravatá",
+        dif=3,
+        comprimento=1.2,
+        alturaMin=0,
+        alturaMax=60,
+        tempoMedio=time(0, 45, 0),
+        usuario=usuario_teste
+    )
     trilhas[trilha_falsa_1.nome] = trilha_falsa_1
     trilhas[trilha_falsa_2.nome] = trilha_falsa_2
+    Moderador.trilhasAprovacao[trilha_falsa_3.nome] = trilha_falsa_3
+    Moderador.trilhasAprovacao[trilha_falsa_2.nome] = trilha_falsa_2
 
 def main():
     #apenas para testar

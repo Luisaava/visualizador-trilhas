@@ -59,10 +59,6 @@ class Usuario:
             return True, f"Pedido de {nome_remetente} recusado."
         # return False, "Pedido não encontrado."
 
-    # def criarTrilha(self, nome: str, inicio: str, fim: str, dif: int, alturaMin: int, alturaMax: int, tempoMedio: time):
-    #     # Trilha(nome, inicio, fim, dif, alturaMin, alturaMax, tempoMedio, self)
-    #     pass
-
     def to_dict(self) -> dict:
         return {
             "nome": self.nome,

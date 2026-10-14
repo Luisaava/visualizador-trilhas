@@ -2,10 +2,10 @@ from dominio.usuarios import Usuario
 from servicos_tecnicos.persistencia import PersistenciaJSON
 from datetime import time, date
 from aplicacao.sessao_cadastroTrilha import SessaoCadastroTrilha
-from aplicacao.sessao_visualizacaoTrilha import SessaoVisualizacaoTrilha ####
-from aplicacao.sessao_inicioPercurso import SessaoInicioPercurso # <--- NOVO
-from aplicacao.sessao_finalizarPercurso import SessaoFinalizarPercurso # <--- NOVO
-from dominio.trilhas import RegistroIndividual # <--- NOVO
+from aplicacao.sessao_visualizacaoTrilha import SessaoVisualizacaoTrilha
+from aplicacao.sessao_inicioPercurso import SessaoInicioPercurso
+from aplicacao.sessao_finalizarPercurso import SessaoFinalizarPercurso
+from dominio.trilhas import RegistroIndividual
 
 class InterfaceUsuario:
     usuarioAtivo: Usuario
@@ -56,7 +56,7 @@ class InterfaceUsuario:
                     print("Opção inválida.\n")
 
     def exibirPerfil(self):
-        print("\n PERFIL DE {self.usuarioAtivo.nome} ===")
+        print(f"\n PERFIL DE {self.usuarioAtivo.nome} ===")
         print(f"Membro desde: {self.usuarioAtivo.dataEntrada}")
 
         concluidas = self.usuarioAtivo.trilhasConcluidas ##pega lista de trilhas do usuario especifico
@@ -185,6 +185,7 @@ class InterfaceUsuario:
                 continue
             if fim.lower() == inicio.lower():
                 print("O início não pode ser igual ao fim.")
+                continue
             break
         while True:
             dif = input("Digite a dificuldade da sua trilha (de 1 a 10): ").strip()
@@ -198,6 +199,7 @@ class InterfaceUsuario:
                     continue
             except ValueError:
                 print("Valor inválido. Tente novamente.")
+                continue
             break
         while True:
             comp = input("Digite o comprimento da sua trilha: ").strip()
@@ -211,6 +213,7 @@ class InterfaceUsuario:
                     continue
             except ValueError:
                 print("Valor inválido. Tente novamente.")
+                continue
             break
         while True:
             alturaMin = input("Digite o ponto de menor altitude da sua trilha: ").strip()
@@ -221,6 +224,7 @@ class InterfaceUsuario:
                 alturaMin = int(alturaMin)
             except ValueError:
                 print("Valor inválido. Tente novamente.")
+                continue
             break
 
         while True:
@@ -235,6 +239,7 @@ class InterfaceUsuario:
                     continue
             except ValueError:
                 print("Valor inválido. Tente novamente.")
+                continue
             break
         while True:
             tempoMedio = input("Digite o tempo médio de duração da sua trilha, no formato 'horas minutos': ").strip()
@@ -254,8 +259,10 @@ class InterfaceUsuario:
                 minutos = int(minutos)
                 if minutos < 0 or minutos >= 60:
                     print("Minutos não podem ser negativos e nem exceder o valor 60. Tente novamente.")
+                    continue
             except ValueError:
                 print("Valor inválido. Tente novamente.")
+                continue
             tempoMedio = time(horas, minutos, 0)
             break
         try:
@@ -326,10 +333,5 @@ class InterfaceUsuario:
         
         if sucesso:
             print(f"\n✅ {msg}")
-            self.percurso_atual = None # Limpa o percurso atual
-            
-            # Opcional: Atualiza o persistencia JSON com o novo registro do usuário
-            # todos = self.persistencia.carregar_todos()
-            # todos[self.usuarioAtivo.nome] = self.usuarioAtivo
-            # self.persistencia.salvar_todos(todos)
+            self.percurso_atual = None
         
