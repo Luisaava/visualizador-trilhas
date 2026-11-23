@@ -19,7 +19,7 @@ class Trilha:
     _variacaoAltitude: int
     _duracaoMedia: time
     _criador: Usuario
-    _apvoradaPor: Moderador
+    _aprovadaPor: Moderador
 
     def __init__(self, nome:str, inicio: str, fim: str, dif: int, comprimento: float, alturaMin: int, alturaMax: int, tempoMedio: time, usuario: Usuario):
         self.nome = nome
@@ -31,17 +31,17 @@ class Trilha:
         self.duracaoMedia = tempoMedio
         self.criador = usuario
     def setAprovada(moderador):
-        _apvoradaPor = moderador
+        _aprovadaPor = moderador
 
 class Registro(ABC):
-    def __init__(self, trilha: Trilha, data: date):
+    def __init__(self, trilha: Trilha, data: time):
         self.trilha = trilha
         self.data = data
         self.duracao = None
         self.nota = None
 
 class RegistroIndividual(Registro):
-    def __init__(self, trilha: Trilha, data: date, usuario):
+    def __init__(self, trilha: Trilha, data: time, usuario):
         super().__init__(trilha, data)
         self.usuario = usuario
 

@@ -3,9 +3,8 @@ from servicos_tecnicos.persistencia import PersistenciaJSON
 from datetime import time, date
 from aplicacao.sessao_cadastroTrilha import SessaoCadastroTrilha
 from aplicacao.sessao_visualizacaoTrilha import SessaoVisualizacaoTrilha
-from aplicacao.sessao_inicioPercurso import SessaoInicioPercurso
-from aplicacao.sessao_finalizarPercurso import SessaoFinalizarPercurso
-from dominio.trilhas import RegistroIndividual
+from aplicacao.sessao_inicioPercurso import SessaoIniciarPercursoIndividual
+from aplicacao.sessao_finalizarPercurso import SessaoFinalizarPercursoIndividual
 
 class InterfaceUsuario:
     usuarioAtivo: Usuario
@@ -17,9 +16,8 @@ class InterfaceUsuario:
         self.persistencia = persistencia
         self.visualizacao = None
         self.cadastro = None
-        self.percurso_atual = None 
-        self.sessaoInicio = SessaoInicioPercurso()
-        self.sessaoFinalizar = SessaoFinalizarPercurso()
+        self.sessaoInicio = SessaoIniciarPercursoIndividual()
+        self.sessaoFinalizar = SessaoFinalizarPercursoIndividual()
         self.exibirInterface()
     
     def exibirInterface(self):
@@ -35,7 +33,7 @@ class InterfaceUsuario:
             7 - Finalizar percurso em andamento\n
             0 - Sair\n""")
             op: str = input("Digite um número para escolher uma opção: ")
-            match(op):
+            match op:
                 case "1":
                     self.exibirPerfil()
                 case "2":
@@ -149,37 +147,28 @@ class InterfaceUsuario:
         nome = inicio = fim = dif = comp = alturaMin = alturaMax = tempoMedio = usuario = None ##alterei pra igual em vez de virgula pois n funcionava
         print("Para cadastrar sua trilha, preencha os campos conforme pedido, ou digite 'sair' para sair")
         while True:
-            nome = input("Digite o nome da sua trilha: ").strip()
+            nome = input("Digite o nome da sua trilha: ").strip().replace("\x00","")
             if nome.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in nome: ##alterei isso também (Antes era find) pq recusava qualquer string
-                print("O nome possui um caractere inválido, tente novamente.")
-                continue
             if nome == "":
                 print("O nome não pode ser vazio, tente novamente.")
                 continue
             break
         while True:
-            inicio = input("Digite o local do início da sua trilha: ").strip()
+            inicio = input("Digite o local do início da sua trilha: ").strip().replace("\x00","")
             if inicio.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in inicio: ##
-                print("O local do início possui um caractere inválido, tente novamente.")
-                continue
             if inicio == "":
                 print("O local do início não pode ser vazio, tente novamente.")
                 continue
             break
         while True:
-            fim = input("Digite o local do fim da sua trilha: ").strip()
+            fim = input("Digite o local do fim da sua trilha: ").strip().replace("\x00","")
             if fim.lower() == "sair":
                 print("Saindo do cadastro.")
                 return
-            if "\x00" in fim: ##
-                print("O local do fim possui um caractere inválido, tente novamente.")
-                continue
             if fim == "":
                 print("O local do fim não pode ser vazio, tente novamente.")
                 continue
@@ -288,26 +277,18 @@ class InterfaceUsuario:
                 self.iniciarPercurso(trilha_escolhida)
 
     def iniciarPercurso(self, trilha):
-        if self.percurso_atual:
-            print(f"\nVocê já tem um percurso em andamento na {self.percurso_atual.trilha.nome}!!!")
-            return
-            
-        # Cria a instância inicial do registro
-        registro = RegistroIndividual(trilha, date.today(), self.usuarioAtivo)
-        
-        # Passa para a sessão iniciar
-        sucesso, msg, reg_iniciado = self.sessaoInicio.iniciarPercurso(registro)
-        
-        if sucesso:
-            self.percurso_atual = reg_iniciado
-            print(f"\n🚶‍♂️ {msg} Boa trilha!")
+        r = self.sessaoInicio.iniciarPercurso(trilha, time.now(), self.usuarioAtivo)
+        if r is not None:
+            print("\n🚶‍♂️ Percurso iniciado com sucesso! Boa trilha!")
+        else:
+            print(f"\nVocê já tem um percurso em andamento na {self.usuarioAtivo.percursoAtivo.trilha.nome}!!!")
 
     def finalizarPercurso(self):
-        if not self.percurso_atual:
+        if not self.usuarioAtivo.percursoAtivo:
             print("\nVocê não tem nenhum percurso em andamento no momento.")
             return
             
-        print(f"\n=== FINALIZANDO PERCURSO: {self.percurso_atual.trilha.nome} ===")
+        print(f"\n=== FINALIZANDO PERCURSO: {self.usuarioAtivo.percursoAtivo.trilha.nome} ===")
         
         while True:
             tempo_str = input("Quanto tempo você levou? (Formato: 'horas minutos'): ").strip()

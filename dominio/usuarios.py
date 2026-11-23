@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import date, time
 from typing import Optional, TYPE_CHECKING
 #from dominio.trilhas import Registro, Trilha 
+from conquistas import Conquista
 
 if TYPE_CHECKING: ##tava dando problema de import circular e isso resolveu
     from dominio.trilhas import Registro, Trilha
@@ -14,6 +15,8 @@ class Usuario:
     _pedidosAmizade: list[str] = []
     _trilhasConcluidas: list[Registro] = []
     _trilhasCriadas: list[Trilha] = []
+    __percursoAtivo: Registro
+    __conquistas: list[Conquista]
     def __init__(
         self,
         nome: str,
@@ -30,6 +33,12 @@ class Usuario:
         #self.conquistas = []
         self.trilhasConcluidas = []
 
+    @property
+    def percursoAtivo(self):
+        return self.__percursoAtivo
+    @percursoAtivo.setter
+    def percursoAtivo(self, p):
+        self.__percursoAtivo = p
     def __str__(self) -> str:
         return f"{self.nome} (membro desde {self.dataEntrada})"
 

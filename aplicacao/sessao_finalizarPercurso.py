@@ -1,7 +1,7 @@
 from dominio.trilhas import Registro
 from datetime import time
 
-class SessaoFinalizarPercurso:
+class SessaoFinalizarPercursoIndividual:
     def finalizarPercurso(self, r: Registro, duracao: time, nota: float) -> tuple[bool, str]:
         r.duracao = duracao
         r.nota = nota
