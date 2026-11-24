@@ -1,22 +1,26 @@
-from aplicacao.sessao_cadastroUsuario import SessaoCadastro
+from __future__ import annotations
+from typing import Optional
+from aplicacao.sessao_cadastroUsuario import SessaoCadastroUsuario
 from aplicacao.sessao_login import SessaoLogin
 from apresentacao.interface_usuario import InterfaceUsuario
 from apresentacao.interface_moderador import InterfaceModerador
-from servicos_tecnicos.persistencia import PersistenciaJSON
+from dominio.usuarios import Moderador
 
 
 class InterfaceInicial:
     def __init__(
         self,
-        sessao_cadastro: SessaoCadastro,
-        sessao_login: SessaoLogin,
-        persistencia: PersistenciaJSON,
+        sessao_cadastro: Optional[SessaoCadastroUsuario] = None,
+        sessao_login: Optional[SessaoLogin] = None,
     ):
-        self.sessao_cadastro = sessao_cadastro
-        self.sessao_login = sessao_login
-        self.persistencia = persistencia
+        self.__sessao_cadastro: SessaoCadastroUsuario = (
+            sessao_cadastro if sessao_cadastro is not None else SessaoCadastroUsuario()
+        )
+        self.__sessao_login: SessaoLogin = (
+            sessao_login if sessao_login is not None else SessaoLogin()
+        )
 
-    def executar(self):
+    def executar(self) -> None:
         while True:
             print("\n==============================")
             print("     SISTEMA DE TRILHAS       ")
@@ -29,35 +33,36 @@ class InterfaceInicial:
 
             match opcao:
                 case "1":
-                    self.tela_login()
+                    self.telaLogin()
                 case "2":
-                    self.tela_cadastro()
+                    self.telaCadastro()
                 case "0":
-                    print("tchau tchau!!")
+                    print("Até logo!")
                     break
                 case _:
                     print("Opção inválida.\n")
 
-    def tela_login(self):
+    def telaLogin(self) -> None:
         nome = input("Digite o nome de usuário: ").strip()
         senha = input("Digite a senha: ").strip()
 
-        sucesso, tipo, usuario = self.sessao_login.autenticar(nome, senha)
+        try:
+            usuario = self.__sessao_login.autenticar(nome, senha)
+            if isinstance(usuario, Moderador):
+                tela_mod = InterfaceModerador(usuario)
+                tela_mod.exibirPainel()
+            else:
+                InterfaceUsuario(usuario)
+        except Exception as e:
+            print(f"\nErro ao realizar login: {e}\n")
 
-        if not sucesso:
-            print("Erro: Usuário ou senha incorretos.\n")
-            return
-
-        if tipo == "MODERADOR":
-            tela_mod = InterfaceModerador(self.persistencia)
-            tela_mod.exibir_painel()
-        elif tipo == "USUARIO" and usuario:
-            InterfaceUsuario(usuario, self.persistencia)
-
-    def tela_cadastro(self):
+    def telaCadastro(self) -> None:
         print("\n--- CADASTRO DE CONTA ---")
         nome = input("Escolha um nome de usuário: ").strip()
         senha = input("Escolha uma senha: ").strip()
 
-        sucesso, _, msg = self.sessao_cadastro.criar_usuario(nome, senha)
-        print(msg)
+        try:
+            usuario = self.__sessao_cadastro.criarUsuario(nome, senha)
+            print(f"\nUsuário '{usuario.nome}' cadastrado com sucesso!\n")
+        except Exception as e:
+            print(f"\nErro no cadastro: {e}\n")

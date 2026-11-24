@@ -1,103 +1,197 @@
 from __future__ import annotations
-from datetime import date, time
+from datetime import date
 from typing import Optional, TYPE_CHECKING
-#from dominio.trilhas import Registro, Trilha 
-from conquistas import Conquista
+from dominio.conquistas import Conquista
 
-if TYPE_CHECKING: ##tava dando problema de import circular e isso resolveu
+if TYPE_CHECKING:
     from dominio.trilhas import Registro, Trilha
 
+
 class Usuario:
-    _nome: str
-    _senha: str
-    _dataEntrada: date
-    _amigos: list[str] = []
-    _pedidosAmizade: list[str] = []
-    _trilhasConcluidas: list[Registro] = []
-    _trilhasCriadas: list[Trilha] = []
-    __percursoAtivo: Registro
-    __conquistas: list[Conquista]
     def __init__(
         self,
         nome: str,
         senha: str,
-        dataEntrada: Optional[str] = None,
-        amigos: Optional[list[str]] = None,
-        pedidosAmizade: Optional[list[str]] = None,
+        dataEntrada: Optional[date] = None,
+        id: Optional[int] = None,
+        percursoAtivo: Optional[Registro] = None,
+        amigos: Optional[list[Usuario]] = None,
+        pedidosAmizade: Optional[list[Usuario]] = None,
+        trilhasConcluidas: Optional[list[Registro]] = None,
+        trilhasCriadas: Optional[list[Trilha]] = None,
+        conquistas: Optional[list[Conquista]] = None,
     ):
-        self.nome = nome
-        self.senha = senha
-        self.dataEntrada = date.fromisoformat(dataEntrada) if dataEntrada else date.today()
-        self.amigos = amigos if amigos is not None else []
-        self.pedidosAmizade = pedidosAmizade if pedidosAmizade is not None else []
-        #self.conquistas = []
-        self.trilhasConcluidas = []
+        self.__id: Optional[int] = id
+        self.__nome: str = nome
+        self.__senha: str = senha
+        if isinstance(dataEntrada, str):
+            self.__dataEntrada: date = date.fromisoformat(dataEntrada)
+        else:
+            self.__dataEntrada: date = dataEntrada if dataEntrada is not None else date.today()
+        self.__percursoAtivo: Optional[Registro] = percursoAtivo
+        self.__amigos: list[Usuario] = amigos if amigos is not None else []
+        self.__pedidosAmizade: list[Usuario] = pedidosAmizade if pedidosAmizade is not None else []
+        self.__trilhasConcluidas: list[Registro] = trilhasConcluidas if trilhasConcluidas is not None else []
+        self.__trilhasCriadas: list[Trilha] = trilhasCriadas if trilhasCriadas is not None else []
+        self.__conquistas: list[Conquista] = conquistas if conquistas is not None else []
 
     @property
-    def percursoAtivo(self):
+    def id(self) -> Optional[int]:
+        return self.__id
+
+    @id.setter
+    def id(self, valor: Optional[int]) -> None:
+        self.__id = valor
+
+    @property
+    def nome(self) -> str:
+        return self.__nome
+
+    @nome.setter
+    def nome(self, valor: str) -> None:
+        self.__nome = valor
+
+    @property
+    def senha(self) -> str:
+        return self.__senha
+
+    @senha.setter
+    def senha(self, valor: str) -> None:
+        self.__senha = valor
+
+    @property
+    def dataEntrada(self) -> date:
+        return self.__dataEntrada
+
+    @dataEntrada.setter
+    def dataEntrada(self, valor: date) -> None:
+        self.__dataEntrada = valor
+
+    @property
+    def percursoAtivo(self) -> Optional[Registro]:
         return self.__percursoAtivo
+
     @percursoAtivo.setter
-    def percursoAtivo(self, p):
-        self.__percursoAtivo = p
+    def percursoAtivo(self, valor: Optional[Registro]) -> None:
+        self.__percursoAtivo = valor
+
+    @property
+    def amigos(self) -> list[Usuario]:
+        return self.__amigos
+
+    @amigos.setter
+    def amigos(self, valor: list[Usuario]) -> None:
+        self.__amigos = valor
+
+    @property
+    def pedidosAmizade(self) -> list[Usuario]:
+        return self.__pedidosAmizade
+
+    @pedidosAmizade.setter
+    def pedidosAmizade(self, valor: list[Usuario]) -> None:
+        self.__pedidosAmizade = valor
+
+    @property
+    def trilhasConcluidas(self) -> list[Registro]:
+        return self.__trilhasConcluidas
+
+    @trilhasConcluidas.setter
+    def trilhasConcluidas(self, valor: list[Registro]) -> None:
+        self.__trilhasConcluidas = valor
+
+    @property
+    def trilhasCriadas(self) -> list[Trilha]:
+        return self.__trilhasCriadas
+
+    @trilhasCriadas.setter
+    def trilhasCriadas(self, valor: list[Trilha]) -> None:
+        self.__trilhasCriadas = valor
+
+    @property
+    def conquistas(self) -> list[Conquista]:
+        return self.__conquistas
+
+    @conquistas.setter
+    def conquistas(self, valor: list[Conquista]) -> None:
+        self.__conquistas = valor
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Usuario):
+            return False
+        if self.__id is not None and other.id is not None:
+            return self.__id == other.id
+        return self.__nome == other.nome
+
     def __str__(self) -> str:
-        return f"{self.nome} (membro desde {self.dataEntrada})"
+        return f"{self.__nome} (membro desde {self.__dataEntrada})"
 
     def adicionarAmigo(self, destinatario: Usuario) -> tuple[bool, str]:
-        if destinatario.nome == self.nome:
-            return False, "Você não pode enviar pedido para si mesmo."
-        if destinatario.nome in self.amigos:
+        if destinatario == self:
+            return False, "Você não pode enviar pedido de amizade para si mesmo."
+        if any(a == destinatario for a in self.__amigos):
             return False, f"Você já é amigo de {destinatario.nome}."
-        if self.nome in destinatario.pedidosAmizade:
+        if any(p == self for p in destinatario.pedidosAmizade):
             return False, f"Pedido já enviado para {destinatario.nome}."
+        if any(p == destinatario for p in self.__pedidosAmizade):
+            return False, f"{destinatario.nome} já enviou um pedido para você. Aceite-o na lista de pedidos."
 
-        destinatario.pedidosAmizade.append(self.nome)
+        destinatario.pedidosAmizade.append(self)
         return True, f"Pedido de amizade enviado para {destinatario.nome}."
 
     def aceitarPedido(self, remetente: Usuario) -> tuple[bool, str]:
-        # if remetente.nome not in self.pedidosAmizade:
-        #     return False, f"Não há pedido pendente de {remetente.nome}."
+        if not any(p == remetente for p in self.__pedidosAmizade):
+            return False, f"Não há pedido pendente de {remetente.nome}."
 
-        self.pedidosAmizade.remove(remetente.nome)
-        self.amigos.append(remetente.nome)
-        remetente.amigos.append(self.nome)
+        self.__pedidosAmizade = [p for p in self.__pedidosAmizade if p != remetente]
+        if not any(a == remetente for a in self.__amigos):
+            self.__amigos.append(remetente)
+        if not any(a == self for a in remetente.amigos):
+            remetente.amigos.append(self)
         return True, f"Pedido de amizade de {remetente.nome} aceito."
 
-    def recusarPedido(self, nome_remetente: str) -> tuple[bool, str]:
-        if nome_remetente in self.pedidosAmizade:
-            self.pedidosAmizade.remove(nome_remetente)
-            return True, f"Pedido de {nome_remetente} recusado."
-        # return False, "Pedido não encontrado."
+    def recusarPedido(self, remetente: Usuario) -> tuple[bool, str]:
+        if not any(p == remetente for p in self.__pedidosAmizade):
+            return False, f"Não há pedido pendente de {remetente.nome}."
 
-    def to_dict(self) -> dict:
-        return {
-            "nome": self.nome,
-            "senha": self.senha,
-            "dataEntrada": self.dataEntrada.isoformat(),
-            "amigos": self.amigos,
-            "pedidosAmizade": self.pedidosAmizade,
-        }
+        self.__pedidosAmizade = [p for p in self.__pedidosAmizade if p != remetente]
+        return True, f"Pedido de amizade de {remetente.nome} recusado."
 
-    @classmethod
-    def from_dict(cls, dados: dict) -> Usuario:
-        return cls(
-            nome=dados["nome"],
-            senha=dados["senha"],
-            dataEntrada=dados.get("dataEntrada"),
-            amigos=dados.get("amigos", []),
-            pedidosAmizade=dados.get("pedidosAmizade", []),
-        )
+    def adicionarConquista(self, conquista: Conquista) -> bool:
+        if not any(c == conquista for c in self.__conquistas):
+            self.__conquistas.append(conquista)
+            return True
+        return False
 
 
 class Moderador(Usuario):
-    trilhasAprovacao: dict = {}
+    def __init__(
+        self,
+        nome: str = "moderador",
+        senha: str = "123",
+        dataEntrada: Optional[date] = None,
+        id: Optional[int] = None,
+        percursoAtivo: Optional[Registro] = None,
+        amigos: Optional[list[Usuario]] = None,
+        pedidosAmizade: Optional[list[Usuario]] = None,
+        trilhasConcluidas: Optional[list[Registro]] = None,
+        trilhasCriadas: Optional[list[Trilha]] = None,
+        conquistas: Optional[list[Conquista]] = None,
+    ):
+        super().__init__(
+            nome=nome,
+            senha=senha,
+            dataEntrada=dataEntrada,
+            id=id,
+            percursoAtivo=percursoAtivo,
+            amigos=amigos,
+            pedidosAmizade=pedidosAmizade,
+            trilhasConcluidas=trilhasConcluidas,
+            trilhasCriadas=trilhasCriadas,
+            conquistas=conquistas,
+        )
 
-    def __init__(self, nome: str = "moderador", senha: str = "123"):
-        super().__init__(nome=nome, senha=senha)
-
-    def aprovarTrilha(self, nome: str, trilhas_globais: dict) -> tuple[bool, str]:
-        if nome not in trilhas_globais:
-            if nome in Moderador.trilhasAprovacao:
-                trilhas_globais[nome] = Moderador.trilhasAprovacao.pop(nome)
-                return True, f"Trilha '{nome}' aprovada com sucesso."
-            return False, f"Trilha '{nome}' não está na fila de aprovação."
-        return False, f"Erro: Trilha com nome '{nome}' já existente."
+    def aprovarTrilha(self, trilha: Trilha) -> tuple[bool, str]:
+        if trilha.aprovadaPor is not None:
+            return False, f"A trilha '{trilha.nome}' já foi aprovada por {trilha.aprovadaPor.nome}."
+        trilha.aprovadaPor = self
+        return True, f"Trilha '{trilha.nome}' aprovada com sucesso."
