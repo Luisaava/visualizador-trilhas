@@ -156,32 +156,40 @@ class MapeadorTrilha:
     def put(self, trilha: Trilha) -> Trilha:
         criador_id = trilha.criador.id if trilha.criador else None
         aprovador_id = trilha.aprovadaPor.id if trilha.aprovadaPor else None
-        with self.__conexao.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO TRILHAS (
-                    NOME, LOCAL_INICIO, LOCAL_FIM, COMPRIMENTO, AVALIACAO,
-                    DIFICULDADE, VARIACAO_ALTITUDE, DURACAO_MEDIA, CRIADOR_ID, APROVADOR_ID
+        try:
+            with self.__conexao.cursor() as cur:
+                cur.execute("SELECT COALESCE(MAX(ID), 0) + 1 FROM TRILHAS;")
+                proximo_id = int(cur.fetchone()[0])
+
+                cur.execute(
+                    """
+                    INSERT INTO TRILHAS (
+                        ID, NOME, LOCAL_INICIO, LOCAL_FIM, COMPRIMENTO, AVALIACAO,
+                        DIFICULDADE, VARIACAO_ALTITUDE, DURACAO_MEDIA, CRIADOR_ID, APROVADOR_ID
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING ID;
+                    """,
+                    (
+                        proximo_id,
+                        trilha.nome,
+                        trilha.localInicio,
+                        trilha.localFim,
+                        trilha.comprimento,
+                        trilha.avaliacao,
+                        trilha.dificuldade,
+                        trilha.variacaoAltitude,
+                        trilha.duracaoMedia,
+                        criador_id,
+                        aprovador_id,
+                    ),
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING ID;
-                """,
-                (
-                    trilha.nome,
-                    trilha.localInicio,
-                    trilha.localFim,
-                    trilha.comprimento,
-                    trilha.avaliacao,
-                    trilha.dificuldade,
-                    trilha.variacaoAltitude,
-                    trilha.duracaoMedia,
-                    criador_id,
-                    aprovador_id,
-                ),
-            )
-            trilha.id = cur.fetchone()[0]
-        self.__conexao.commit()
-        return trilha
+                trilha.id = cur.fetchone()[0]
+            self.__conexao.commit()
+            return trilha
+        except Exception:
+            self.__conexao.rollback()
+            raise
 
     def update(self, trilha: Trilha) -> None:
         if trilha.id is None:

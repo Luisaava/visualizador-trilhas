@@ -1,6 +1,6 @@
 #PROXIMA ITERACAO
 from servicos_tecnicos.mapeador import Mapeador
-from dominio.trilhas import Trilha
+from dominio.trilhas import Trilha 
 from dominio.usuarios import Moderador, Usuario
 from datetime import time
 
@@ -14,11 +14,21 @@ class SessaoCadastroTrilha:
         self.dificuldadeValida(dif)
         self.comprimentoValido(comp)
         self.tempoValido(horas, minutos)
-        t = Trilha(nome, inicio, fim, dif, comp, alturaMin, alturaMax, time(horas, minutos, 0), usuario)
-        Moderador.trilhasAprovacao[nome] = t
+        t = Trilha(
+                nome=nome,
+                localInicio=inicio,
+                localFim=fim,
+                comprimento=comp,
+                dificuldade=dif,
+                variacaoAltitude=alturaMax - alturaMin,
+                duracaoMedia=time(horas, minutos, 0),
+                criador=usuario,
+            )
+        self.mapeador.salvarTrilha(t)
+       
         # mandar pra moderador
-    def trilhaInexistente(self, nome: str) -> None:
-        if self.mapeador.getTrilha(nome) is not None:
+    def trilhaInexistente(self, nome: str) -> None: #ALTEREI AQUI!!!
+        if self.mapeador.getTrilhaPorNome(nome) is not None:
             raise Exception("Trilha com nome já existente. Tente novamente.")
     def inicioEFimDiferentes(self, inicio:str, fim:str):
         if inicio == fim:
